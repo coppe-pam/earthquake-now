@@ -1,1 +1,27 @@
+name: Fetch JMA Earthquake Data
 
+on:
+  schedule:
+    - cron: "*/2 * * * *"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install xml2js node-fetch
+
+      - run: node scripts/fetch-jma.js
+
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add public/data/earthquakes.json
+          git commit -m "Update earthquake data" || echo "No changes"
+          git push
